@@ -64,6 +64,34 @@ public class MinMaxPlayer extends ComputerPlayer {
 		//TODO
 	}
 	
+	public Move minimaxDecision(Game game) {
+		//We initiate the first value to which we'll compare the rest
+		Game tempGame = game.copy();
+		Move m = getMoves(game).get(0);
+		tempGame.move(m.getStartIndex(), m.getEndIndex());
+		int v = minValue(tempGame);
+		
+		//We check each values from the possible moves and choose the best one for the MIN player
+		for(Move mTemp :getMoves(game))
+		{
+			counter = 0;
+			tempGame = game.copy();
+			tempGame.move(mTemp.getStartIndex(), mTemp.getEndIndex());
+			int vTemp = setup_Value(tempGame);
+			if(vTemp > v)
+			{
+				m = mTemp;
+				v = vTemp;
+			}
+		}
+		return m;
+	}
+	
+	//the only function overwritten in AlphaBetaPlayer, instead of overwriting minimaxDecision
+	protected int setup_Value(Game tempGame) {
+		return minValue(tempGame);
+	}
+	
 	public int maxValue(Game game) {
 		//We don't go too deep to prevent from stackoverflow
 		counter++;
@@ -86,11 +114,11 @@ public class MinMaxPlayer extends ComputerPlayer {
 			//We check if the same player can play multiple times because of skips
 			if(!tempGame.isP2Turn())
 			{
-				v = Math.min(v, maxValue(tempGame)); //If skips are available
+				v = affect_v_Value("min",v,tempGame); //If skips are available
 			}
 			else 
 			{
-				v = Math.max(v, minValue(tempGame)); //If skips aren't available
+				v = affect_v_Value("max",v,tempGame); //If skips aren't available
 			}
 			
 		}
@@ -114,11 +142,11 @@ public class MinMaxPlayer extends ComputerPlayer {
 			
 			if(tempGame.isP2Turn())
 			{
-				v = Math.max(v, minValue(tempGame));
+				v = affect_v_Value("max",v,tempGame);
 			}
 			else
 			{
-				v = Math.min(v, maxValue(tempGame));
+				v = affect_v_Value("min",v,tempGame);
 			}
 			
 		}
@@ -126,28 +154,13 @@ public class MinMaxPlayer extends ComputerPlayer {
 		return v;
 	}
 	
-	public Move minimaxDecision(Game game) {
-		//We initiate the first value to which we'll compare the rest
-		Game tempGame = game.copy();
-		Move m = getMoves(game).get(0);
-		tempGame.move(m.getStartIndex(), m.getEndIndex());
-		int v = minValue(tempGame);
-		
-		//We check each values from the possible moves and choose the best one for the MIN player
-		for(Move mTemp :getMoves(game))
-		{
-			counter = 0;
-			tempGame = game.copy();
-			tempGame.move(mTemp.getStartIndex(), mTemp.getEndIndex());
-			int vTemp = minValue(tempGame);
-			if(vTemp > v)
-			{
-				m = mTemp;
-				v = vTemp;
-			}
-		}
-		return m;
+	//the only function overwritten in AlphaBetaPlayer, instead of overwriting these 2 functions above
+	protected int affect_v_Value(String minmax, int v, Game tempGame) {
+		if (minmax == "max") return Math.max(v, minValue(tempGame));
+		else return Math.min(v, maxValue(tempGame));
 	}
+	
+	
 	
 	/**
 	 * Gets all the available moves and skips for the current player.

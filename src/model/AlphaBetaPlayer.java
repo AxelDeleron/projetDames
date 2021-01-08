@@ -6,7 +6,6 @@
 
 package model;
 
-import java.util.List;
 
 /**
  * The {@code ComputerPlayer} class represents a computer player and updates
@@ -14,24 +13,33 @@ import java.util.List;
  */
 public class AlphaBetaPlayer extends MinMaxPlayer {
 
-	//public boolean player;
+	protected int alpha;
+	protected int beta;
 	
 	public AlphaBetaPlayer(boolean joueur) {
 		super(joueur);
-	}
-	@Override
-	public boolean isHuman() {
-		return false;
+		alpha = 0;
+		beta = 0;
 	}
 
 	@Override
-	public void updateGame(Game game) {
-		
-		// Nothing to do
-		if (game == null || game.isGameOver()) {
-			return;
+	protected int setup_Value(Game tempGame) { // == alphaBetaSearch
+		return maxValue(tempGame);
+	}
+	
+	@Override
+	protected int affect_v_Value(String minmax, int v, Game tempGame) {
+		if (minmax == "max") {
+			int vTemp = Math.max(v, minValue(tempGame));
+			if (vTemp >= beta) return vTemp;
+			else alpha = Math.max(alpha, v);
+			return vTemp;
 		}
-			
-		//TODO
+		else {
+			int vTemp = Math.min(v, maxValue(tempGame));
+			if (vTemp <= alpha) return vTemp;
+			else beta = Math.min(beta, v);
+			return vTemp;
+		}
 	}
 }
